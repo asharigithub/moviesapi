@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import*
 from django.contrib.auth.models import User
+
 class MovieSerializer(serializers.Serializer):
     name=serializers.CharField()
     year=serializers.IntegerField()

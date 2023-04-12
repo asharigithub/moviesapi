@@ -15,7 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import MovieList,MovieItem,MovieModelItem,MovieMItem,UserCreationView
+from api.views import MovieList,MovieItem,MovieModelItem,MovieMItem,UserCreationView,MovieApi,MovieApiMV
+
+from rest_framework.routers import DefaultRouter
+router=DefaultRouter()
+router.register('movieapi',MovieApi,basename='mapi')
+router.register('mvapi',MovieApiMV,basename='mvapi')
 
 
 urlpatterns = [
@@ -25,4 +30,5 @@ urlpatterns = [
     path('mv',MovieModelItem.as_view()),
     path('mv/<int:mid>',MovieMItem.as_view()),
     path('user',UserCreationView.as_view())
-]
+
+]+ router.urls

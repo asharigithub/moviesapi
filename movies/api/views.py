@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from .models import Movies
+from rest_framework.viewsets import ViewSet,ModelViewSet
 from rest_framework.response import Response #the special redirect method of api , the object of which is taken
 from .serializer import MovieSerializer,MoviesModelSer,UserSerializer
 from rest_framework import status
@@ -104,3 +105,52 @@ class UserCreationView(APIView):
             return Response({"msg":"registration completd"})
         else:
             return Response({"msg":ser.errors},status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+
+
+#using vieset
+class MovieApi(ViewSet):
+    def list(self,request,*args,**kwargs):
+        mv=Movies.objects.all()
+        dser=MoviesModelSer(mv,many=True)
+        return Response(data=dser.data)
+    def retrieve(self,request,*args,**kwargs):
+        id=kwargs.get("pk")
+        try:
+            mv=Movies.objects.get(id=id)
+            dser=MoviesModelSer(mv)
+            return Response(data=dser.data)
+        except:
+            return Response({"msg":"invalid id"},status=status.HTTP_400_BAD_REQUEST)
+    
+    def create(self,request,*args,**kwargs):
+        ser=MoviesModelSer(data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response({"msg":"movie updated"})
+        else:
+            return Response({"msg":ser.errors},status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+    def update(self,request,*args,**kwargs):
+        id=kwargs.get("pk")
+        mv=Movies.objects.get(id=id)
+        ser=MoviesModelSer(data=request.data,instance=mv)
+        if ser.is_valid():
+                ser.save()
+                return Response({"msg":"updated"})
+        else:
+                return Response({"msg":ser.errors},status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+    def destroy(self,request,*args,**kwargs):
+        id=kwargs.get("pk")
+        try:
+            Movies.objects.filter(id=id).delete()
+            return Response({"msg":"deletion completed"})
+        except:
+            return Response({"msg":"invalid id"},status=status.HTTP_404_NOT_FOUND)
+
+#using model viewset
+
+class MovieApiMV(ModelViewSet):
+    serializer_class=MoviesModelSer
+    queryset=Movies.objects.all()
+    model=Movies
+
