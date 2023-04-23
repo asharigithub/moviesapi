@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api.views import MovieList,MovieItem,MovieModelItem,MovieMItem,UserCreationView,MovieApi,MovieApiMV
-
+from rest_framework.authtoken import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from rest_framework.routers import DefaultRouter
 router=DefaultRouter()
 router.register('movieapi',MovieApi,basename='mapi')
@@ -29,6 +33,9 @@ urlpatterns = [
     path('movies/<int:mid>',MovieItem.as_view()),
     path('mv',MovieModelItem.as_view()),
     path('mv/<int:mid>',MovieMItem.as_view()),
-    path('user',UserCreationView.as_view())
+    path('user',UserCreationView.as_view()),
+    path('tauth/',views.obtain_auth_token),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
 ]+ router.urls

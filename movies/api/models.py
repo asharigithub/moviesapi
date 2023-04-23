@@ -1,5 +1,6 @@
 from django.db import models
 from rest_framework import serializers
+from django.contrib.auth.models import User
 
 
 movies=[
@@ -16,6 +17,13 @@ class Movies(models.Model):
     year=models.IntegerField()
     director=models.CharField(max_length=100)
     genre=models.CharField(max_length=100)
+
+class Reviews(models.Model):
+    review=models.CharField(max_length=500)
+    rating=models.FloatField()
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    movie=models.ForeignKey(Movies,on_delete=models.CASCADE)
+    date=models.DateField(auto_now_add=True)
 
     
 

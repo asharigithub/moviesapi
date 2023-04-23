@@ -3,8 +3,11 @@ from rest_framework.views import APIView
 from .models import Movies
 from rest_framework.viewsets import ViewSet,ModelViewSet
 from rest_framework.response import Response #the special redirect method of api , the object of which is taken
-from .serializer import MovieSerializer,MoviesModelSer,UserSerializer
+from .serializer import*
 from rest_framework import status
+from rest_framework import permissions
+from rest_framework import authentication
+from rest_framework.decorators import action
 
 class MovieList(APIView):
     def get(self,request,*args,**kwargs):
@@ -148,9 +151,36 @@ class MovieApi(ViewSet):
             return Response({"msg":"invalid id"},status=status.HTTP_404_NOT_FOUND)
 
 #using model viewset
+#mvapi/2/get_reviews
+#mvapi/2/add_reviews
+
 
 class MovieApiMV(ModelViewSet):
     serializer_class=MoviesModelSer
     queryset=Movies.objects.all()
     model=Movies
+    permission_classes=[permissions.IsAuthenticated]
+    authentication_classes=[authentication.TokenAuthentication]
+
+    @action(detail=True, methods=["post"])
+    def add_review(self,request,*args,**kwargs):
+        id=kwargs.get("pk")
+        mv=Movies.objects.get(id=id)
+        user=request.user
+        ser=ReviewSerializers(data=request.data,context={"user":user,"movie":mv})
+        if ser.is_valid():
+            ser.save()
+            return Response({"msg":"added"})
+        else:
+            return Response({"msg":ser.errors},status=status.HTTP_400_BAD_REQUEST)
+    def get_reviews(self,request,*args,**kwargs):
+        id=kwargs.get("pk")
+        mv=Movies.objects.get(id=id)
+        review=Reviews.objects.filter(movie=mv)
+        dser=ReviewSerializers(review,many=True)
+        return Response(data=dser.data)
+    
+
+
+
 
